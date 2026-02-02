@@ -33,6 +33,13 @@ const decryptedSchema = z.object({
 async function handler(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
 
+  const webappUrl = process.env.NEXT_PUBLIC_WEBAPP_URL || "http://localhost:3000";
+
+  console.log("[link/route] request.url:", request.url);
+  console.log("[link/route] request.nextUrl:", request.nextUrl.toString());
+  console.log("[link/route] NEXT_PUBLIC_WEBAPP_URL:", process.env.NEXT_PUBLIC_WEBAPP_URL);
+  console.log("[link/route] Using webappUrl:", webappUrl);
+
   const { action, token, reason } = querySchema.parse(Object.fromEntries(searchParams.entries()));
 
   const decryptedData = JSON.parse(
@@ -98,12 +105,18 @@ async function handler(request: NextRequest) {
   } catch (e) {
     let message = "Error confirming booking";
     if (e instanceof TRPCError) message = (e as TRPCError).message;
-    return NextResponse.redirect(
-      new URL(`/booking/${bookingUid}?error=${encodeURIComponent(message)}`, request.url)
-    );
+    const errorRedirectUrl = new URL(`/booking/${bookingUid}?error=${encodeURIComponent(message)}`, webappUrl);
+    const errorRedirectUrlOriginal = new URL(`/booking/${bookingUid}?error=${encodeURIComponent(message)}`, request.url);
+    console.log("[link/route] Error redirect URL (using webappUrl):", errorRedirectUrl.toString());
+    console.log("[link/route] Error redirect URL (using request.url):", errorRedirectUrlOriginal.toString());
+    return NextResponse.redirect(errorRedirectUrl);
   }
 
-  return NextResponse.redirect(new URL(`/booking/${bookingUid}`, request.url));
+  const successRedirectUrl = new URL(`/booking/${bookingUid}`, webappUrl);
+  const successRedirectUrlOriginal = new URL(`/booking/${bookingUid}`, request.url);
+  console.log("[link/route] Success redirect URL (using webappUrl):", successRedirectUrl.toString());
+  console.log("[link/route] Success redirect URL (using request.url):", successRedirectUrlOriginal.toString());
+  return NextResponse.redirect(successRedirectUrl);
 }
 
 export const GET = defaultResponderForAppDir(handler);

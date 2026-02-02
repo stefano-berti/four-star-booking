@@ -1,4 +1,7 @@
-FROM --platform=$BUILDPLATFORM node:20 AS builder
+#FROM --platform=$BUILDPLATFORM node:20 AS builder
+FROM --platform=$TARGETPLATFORM node:20 AS builder
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
 
 WORKDIR /calcom
 
@@ -81,6 +84,12 @@ WORKDIR /calcom
 RUN apt-get update && apt-get install -y --no-install-recommends netcat-openbsd wget && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder-two /calcom ./
+RUN corepack disable || true
+
+# Install Yarn classic (v1) and force it to be the one used
+RUN npm i -g yarn@1.22.22 --force
+ENV npm_config_registry=https://registry.npmjs.org/
+
 ARG NEXT_PUBLIC_WEBAPP_URL=http://localhost:3000
 ENV NEXT_PUBLIC_WEBAPP_URL=$NEXT_PUBLIC_WEBAPP_URL \
   BUILT_NEXT_PUBLIC_WEBAPP_URL=$NEXT_PUBLIC_WEBAPP_URL
