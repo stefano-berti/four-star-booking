@@ -1,8 +1,7 @@
 name: Production Builds
 
 on:
-  workflow_call:
-
+  workflow_dispatch:
 permissions:
   contents: read
 
@@ -92,3 +91,4 @@ jobs:
           export NODE_OPTIONS="--max_old_space_size=8192"
           yarn turbo run build --filter=@calcom/api...
         shell: bash
+

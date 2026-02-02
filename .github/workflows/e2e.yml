@@ -1,6 +1,6 @@
 name: E2E
 on:
-  workflow_call:
+  workflow_dispatch:
 permissions:
   actions: write
   contents: read
@@ -99,3 +99,4 @@ jobs:
           name: blob-report-${{ matrix.shard }}
           path: blob-report
           retention-days: 30
+

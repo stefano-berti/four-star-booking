@@ -1,6 +1,6 @@
 name: Lint
 on:
-  workflow_call:
+  workflow_dispatch:
 permissions:
   actions: write
   contents: read
@@ -16,3 +16,4 @@ jobs:
       - uses: ./.github/actions/yarn-install
       - name: Run Lint
         run: yarn lint
+

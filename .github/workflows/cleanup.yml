@@ -1,9 +1,7 @@
 name: Delete
 
 on:
-  delete:
-    branches-ignore: [main, gh-pages]
-
+  workflow_dispatch:
 permissions:
   contents: write
   issues: write
@@ -71,3 +69,4 @@ jobs:
               exit 0
             fi
           done
+

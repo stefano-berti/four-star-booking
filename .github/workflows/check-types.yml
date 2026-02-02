@@ -1,6 +1,6 @@
 name: Check types
 on:
-  workflow_call:
+  workflow_dispatch:
 env:
   NODE_OPTIONS: --max-old-space-size=12288
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
@@ -23,3 +23,4 @@ jobs:
           echo "::remove-matcher owner=tsc::"
           echo "::add-matcher::.github/matchers/tsc-absolute.json"
       - run: yarn type-check:ci
+
