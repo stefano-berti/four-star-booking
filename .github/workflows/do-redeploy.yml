@@ -1,0 +1,16 @@
+name: Redeploy DigitalOcean App (scheduled)
+
+on:
+  schedule:
+    - cron: "0 4 * * *"  # every day at 04:00 UTC
+  workflow_dispatch:
+
+jobs:
+  redeploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger DigitalOcean App Platform deploy
+        uses: digitalocean/app_action/deploy@v2
+        with:
+          token: ${{ secrets.DO_API_TOKEN }}
+          app_id: ${{ secrets.DO_APP_ID }}
