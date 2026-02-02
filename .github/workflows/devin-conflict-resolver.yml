@@ -1,15 +1,7 @@
 name: Devin PR Conflict Resolver
 
 on:
-  pull_request_target:
-    types: [labeled]
   workflow_dispatch:
-    inputs:
-      pr_number:
-        description: 'PR number to resolve conflicts for'
-        required: true
-        type: string
-
 permissions:
   contents: read
   pull-requests: write
@@ -18,10 +10,6 @@ jobs:
   resolve-conflicts:
     name: Resolve PR Conflicts with Devin
     runs-on: blacksmith-2vcpu-ubuntu-2404
-    # Only run when devin-conflict-resolution label is added, or on manual dispatch
-    if: |
-      (github.event_name == 'pull_request_target' && github.event.label.name == 'devin-conflict-resolution') ||
-      github.event_name == 'workflow_dispatch'
     steps:
       - name: Get PR details
         id: get-pr
@@ -428,3 +416,4 @@ jobs:
               console.error(`Error handling Devin session for PR #${pr.number}: ${error.message}`);
               core.setFailed(error.message);
             }
+

@@ -1,6 +1,6 @@
 name: E2E App Store Tests
 on:
-  workflow_call:
+  workflow_dispatch:
 permissions:
   actions: write
   contents: read
@@ -104,3 +104,4 @@ jobs:
         with:
           name: blob-report-app-store
           path: blob-report
+

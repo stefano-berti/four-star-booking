@@ -1,11 +1,7 @@
 name: Cron - webhookTriggers
 
 on:
-  # "Scheduled workflows run on the latest commit on the default or base branch."
-  # — https://docs.github.com/en/actions/learn-github-actions/events-that-trigger-workflows#schedule
-  schedule:
-    # Runs “every minute” (see https://crontab.guru)
-    - cron: "* * * * *"
+  workflow_dispatch:
 jobs:
   cron-webhookTriggers:
     env:
@@ -31,3 +27,4 @@ jobs:
             -H 'content-type: application/json' \
             -H 'authorization: ${{ env.CRON_API_KEY_EU }}' \
             -sSf
+

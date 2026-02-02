@@ -1,8 +1,6 @@
 name: Run i18n AI automation
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-main
   cancel-in-progress: false
@@ -35,3 +33,4 @@ jobs:
         with:
           api-key: ${{ secrets.CI_LINGO_DOT_DEV_API_KEY }}
           pull-request: true
+

@@ -5,11 +5,6 @@ permissions:
   pull-requests: write
 
 on:
-  # "Scheduled workflows run on the latest commit on the default or base branch."
-  # — https://docs.github.com/en/actions/learn-github-actions/events-that-trigger-workflows#schedule
-  schedule:
-    # Runs "At 00:00." every day (see https://crontab.guru)
-    - cron: "0 0 * * *"
   workflow_dispatch:
 jobs:
   stale:
@@ -25,3 +20,4 @@ jobs:
           stale-pr-message: "This PR has been marked as stale due to inactivity. If you're still working on it or need any help, please let us know or update the PR to keep it active."
           close-pr-message: "This PR has been closed due to inactivity. Please feel free to reopen it if you'd like to continue the work."
           operations-per-run: 100
+

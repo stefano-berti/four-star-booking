@@ -1,8 +1,7 @@
 name: Check API v2 breaking changes
 
 on:
-  workflow_call:
-
+  workflow_dispatch:
 permissions:
   contents: read
 
@@ -65,3 +64,4 @@ jobs:
             docs/api-reference/v2/openapi.json \
             --fail-on ERR \
             --err-ignore .github/oasdiff-err-ignore.txt
+

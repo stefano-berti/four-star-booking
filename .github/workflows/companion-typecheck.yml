@@ -1,8 +1,7 @@
 name: Companion Type Check
 
 on:
-  workflow_call:
-
+  workflow_dispatch:
 permissions:
   contents: read
 
@@ -32,3 +31,4 @@ jobs:
       - name: Type check
         working-directory: companion
         run: bun run typecheck:all
+

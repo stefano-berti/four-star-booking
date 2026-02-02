@@ -1,6 +1,6 @@
 name: Integration
 on:
-  workflow_call:
+  workflow_dispatch:
 permissions:
   contents: read
 env:
@@ -94,3 +94,4 @@ jobs:
       #   with:
       #     name: test-results
       #     path: test-results
+

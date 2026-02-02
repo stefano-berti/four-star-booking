@@ -1,9 +1,7 @@
 name: Cubic AI to Devin Review
 
 on:
-  pull_request_review:
-    types: [submitted]
-
+  workflow_dispatch:
 permissions:
   contents: read
   pull-requests: write
@@ -11,8 +9,6 @@ permissions:
 jobs:
   trigger-devin:
     name: Trigger Devin to Address Cubic AI Review
-    # Only run if the review is from cubic-dev-ai bot and contains the AI prompt
-    if: github.event.review.user.login == 'cubic-dev-ai[bot]'
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - name: Extract AI prompt from Cubic review
@@ -208,3 +204,4 @@ jobs:
           else
             echo "Completion instructions sent to Devin session successfully"
           fi
+
