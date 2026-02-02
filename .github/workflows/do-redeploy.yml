@@ -1,16 +1,17 @@
-name: Redeploy DigitalOcean App (scheduled)
+name: DO redeploy (manual test)
 
 on:
-  schedule:
-    - cron: "0 4 * * *"  # daily at 04:00 UTC
   workflow_dispatch:
 
 jobs:
   redeploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger DigitalOcean App Platform deploy
-        uses: digitalocean/app_action/deploy@v2
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DO_API_TOKEN }}
-          app_name: ${{ secrets.DO_APP_NAME }}
+
+      - name: Trigger App Platform deployment (update sources)
+        run: |
+          doctl apps create-deployment ${{ secrets.DO_APP_ID }} --update-sources --wait
