@@ -1,8 +1,5 @@
 on:
-  workflow_call:
-  pull_request:
-    types: [closed]
-
+  workflow_dispatch:
 permissions:
   contents: write
   issues: write
@@ -44,3 +41,4 @@ jobs:
           else
             echo "No reports found for branch $HEAD_REF. Nothing to clean up."
           fi
+

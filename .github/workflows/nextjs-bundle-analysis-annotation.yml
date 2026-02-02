@@ -1,9 +1,7 @@
 name: "Next.js Bundle Analysis Annotation"
 
 on:
-  workflow_call:
   workflow_dispatch:
-
 permissions:
   actions: read
   contents: read
@@ -11,7 +9,6 @@ permissions:
 
 jobs:
   annotate:
-    if: always()
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
@@ -79,3 +76,4 @@ jobs:
           body: ${{ steps.get-comment-body.outputs.body }}
           comment-id: ${{ steps.fc.outputs.comment-id }}
           edit-mode: replace
+

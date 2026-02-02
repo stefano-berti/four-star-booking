@@ -1,9 +1,7 @@
 name: Run CI
 
 on:
-  pull_request_target:
-    types: [labeled]
-
+  workflow_dispatch:
 permissions:
   actions: write
   contents: read
@@ -11,7 +9,6 @@ permissions:
 jobs:
   trigger:
     name: Trigger CI
-    if: github.event.label.name == 'run-ci' || github.event.label.name == 'ready-for-e2e'
     runs-on: ubuntu-latest
     steps:
       - name: Verify and trigger CI
@@ -123,3 +120,4 @@ jobs:
             });
 
             console.log(`Triggered: ${latestRun.html_url}`);
+

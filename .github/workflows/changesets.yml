@@ -1,10 +1,7 @@
 name: Create PR containing updated CHANGELOG.md and release packages to NPM once PR is merged
 
 on:
-  push:
-    branches:
-      - main
-
+  workflow_dispatch:
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 permissions:
   id-token: write # for NPM provenance - developers can verify where and how it was built
@@ -13,7 +10,6 @@ permissions:
 
 jobs:
   release:
-    if: github.repository == 'calcom/cal.com' # prevent this action from running on forks
     name: Release
     runs-on: ubuntu-latest
     steps:
@@ -45,3 +41,4 @@ jobs:
           VITE_BOOKER_EMBED_OAUTH_CLIENT_ID: ${{ secrets.VITE_BOOKER_EMBED_OAUTH_CLIENT_ID }}
           VITE_BOOKER_EMBED_API_URL: ${{ secrets.VITE_BOOKER_EMBED_API_URL }}
           NEXT_PUBLIC_WEBAPP_URL: ${{ secrets.NEXT_PUBLIC_WEBAPP_URL }}
+

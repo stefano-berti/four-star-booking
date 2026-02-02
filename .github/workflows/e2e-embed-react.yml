@@ -1,6 +1,6 @@
 name: E2E Embed React tests and booking flow (for non-embed as well)
 on:
-  workflow_call:
+  workflow_dispatch:
 permissions:
   actions: write
   contents: read
@@ -91,3 +91,4 @@ jobs:
         with:
           name: blob-report-embed-react
           path: blob-report
+

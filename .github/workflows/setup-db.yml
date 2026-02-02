@@ -1,14 +1,7 @@
 name: Setup Database
 
 on:
-  workflow_call:
-    inputs:
-      DB_CACHE_HIT:
-        required: false
-        type: string
-        default: "false"
-        description: "Whether the DB cache was hit (skip yarn-install and cache-db if true)"
-
+  workflow_dispatch:
 permissions:
   contents: read
 
@@ -56,3 +49,4 @@ jobs:
         if: inputs.DB_CACHE_HIT != 'true'
       - uses: ./.github/actions/cache-db
         if: inputs.DB_CACHE_HIT != 'true'
+

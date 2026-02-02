@@ -1,8 +1,7 @@
 name: Companion Lint
 
 on:
-  workflow_call:
-
+  workflow_dispatch:
 permissions:
   contents: read
 
@@ -31,3 +30,4 @@ jobs:
       - name: Run lint
         working-directory: companion
         run: bun run lint:all
+

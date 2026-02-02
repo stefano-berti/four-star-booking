@@ -1,26 +1,5 @@
 on:
-  workflow_call:
-    inputs:
-      head_branch:
-        description: 'The head branch name for report path'
-        required: true
-        type: string
-      source_run_id:
-        description: 'The source run ID for report path'
-        required: true
-        type: string
-      source_run_number:
-        description: 'The source run number for artifact naming and comment'
-        required: true
-        type: string
-      source_run_attempt:
-        description: 'The source run attempt for artifact naming and comment'
-        required: true
-        type: string
-      pr_number:
-        description: 'The PR number to post comment on'
-        required: true
-        type: string
+  workflow_dispatch:
 permissions:
   contents: write
   issues: write
@@ -130,3 +109,4 @@ jobs:
             <!-- GENERATED-E2E-RESULTS -->
             ## E2E results are ready!
             - [Workflow #${{ inputs.source_run_number }}.${{ inputs.source_run_attempt }} latest results](${{ steps.url.outputs.link }})
+

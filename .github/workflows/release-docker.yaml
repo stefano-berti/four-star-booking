@@ -11,24 +11,7 @@ env:
   DATABASE_HOST: "database:5432"
 
 on:
-  push:
-    tags:
-      - "v*"
-  # in case manual trigger is needed
   workflow_dispatch:
-    inputs:
-      BUILD_FROM_BRANCH:
-        description: "Build from the selected branch instead of a tag"
-        type: boolean
-        default: false
-      RELEASE_TAG:
-        description: "Tag to build (e.g., v6.0.5) - required if BUILD_FROM_BRANCH is false"
-        required: false
-      PUSH_IMAGE:
-        description: "Push the Docker image to DockerHub"
-        type: boolean
-        default: true
-
 jobs:
   prepare:
     name: "Prepare Release"
@@ -174,3 +157,4 @@ jobs:
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.CI_SLACK_WEBHOOK_URL }}
+

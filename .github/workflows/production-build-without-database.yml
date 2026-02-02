@@ -1,7 +1,6 @@
 name: Production Builds
 on:
-  workflow_call:
-
+  workflow_dispatch:
 permissions:
   contents: read
   actions: write
@@ -71,3 +70,4 @@ jobs:
           key: prod-build-${{ github.head_ref || github.ref_name }}
           prefix: "true"
       - uses: ./.github/actions/cache-build
+

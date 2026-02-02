@@ -1,7 +1,6 @@
 name: Check Prisma Migrations
 on:
-  workflow_call:
-
+  workflow_dispatch:
 env:
   DATABASE_URL: ${{ secrets.CI_DATABASE_URL }}
 
@@ -39,3 +38,4 @@ jobs:
             --from-migrations ./migrations \
             --to-schema-datamodel ./schema.prisma \
             --shadow-database-url ${{ env.DATABASE_URL }}
+

@@ -1,8 +1,7 @@
 name: Production Build
 
 on:
-  workflow_call:
-
+  workflow_dispatch:
 env:
   DATABASE_URL: ${{ secrets.CI_DATABASE_URL }}
   DATABASE_DIRECT_URL: ${{ secrets.CI_DATABASE_URL }}
@@ -47,3 +46,4 @@ jobs:
           export NODE_OPTIONS="--max_old_space_size=8192"
           yarn turbo run build --filter=@calcom/api-v2
         shell: bash
+

@@ -1,23 +1,6 @@
 # https://playwright.dev/docs/test-sharding#merging-reports-from-multiple-shards
 on:
-  workflow_call:
-    inputs:
-      source_run_id:
-        description: 'The run ID to download artifacts from (for workflow_run triggered calls)'
-        required: true
-        type: string
-      source_run_number:
-        description: 'The run number for artifact naming'
-        required: true
-        type: string
-      source_run_attempt:
-        description: 'The run attempt for artifact naming'
-        required: true
-        type: string
-      source_head_sha:
-        description: 'The head SHA to checkout for Playwright version consistency'
-        required: true
-        type: string
+  workflow_dispatch:
 jobs:
   merge-reports:
     runs-on: ubuntu-latest
@@ -43,3 +26,4 @@ jobs:
           name: html-report--attempt-${{ inputs.source_run_number }}-${{ inputs.source_run_attempt }}
           path: playwright-report
           retention-days: 14
+

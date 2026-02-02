@@ -2,12 +2,6 @@
 name: PR Update
 
 on:
-  pull_request_target:
-    types: [opened, synchronize, reopened]
-    branches:
-      - main
-      - gh-actions-test-branch
-
   workflow_dispatch:
 
 permissions:
@@ -161,7 +155,6 @@ jobs:
   prepare:
     name: Prepare
     needs: [trust-check]
-    if: needs.trust-check.outputs.is-trusted == 'true'
     runs-on: blacksmith-2vcpu-ubuntu-2404
     permissions:
       pull-requests: read
@@ -311,28 +304,24 @@ jobs:
   type-check:
     name: Type Checks
     needs: [prepare]
-    if: ${{ needs.prepare.outputs.has-files-requiring-all-checks == 'true' }}
     uses: ./.github/workflows/check-types.yml
     secrets: inherit
 
   lint:
     name: Linters
     needs: [prepare]
-    if: ${{ needs.prepare.outputs.has-files-requiring-all-checks == 'true' }}
     uses: ./.github/workflows/lint.yml
     secrets: inherit
 
   unit-test:
     name: Tests
     needs: [prepare]
-    if: ${{ needs.prepare.outputs.has-files-requiring-all-checks == 'true' }}
     uses: ./.github/workflows/unit-tests.yml
     secrets: inherit
 
   api-v2-unit-test:
     name: Tests
     needs: [prepare]
-    if: ${{ needs.prepare.outputs.has-files-requiring-all-checks == 'true' }}
     uses: ./.github/workflows/api-v2-unit-tests.yml
     secrets: inherit
 
@@ -346,14 +335,12 @@ jobs:
   check-prisma-migrations:
     name: Check Prisma Migrations
     needs: [prepare]
-    if: ${{ needs.prepare.outputs.has-prisma-changes == 'true' }}
     uses: ./.github/workflows/check-prisma-migrations.yml
     secrets: inherit
 
   setup-db:
     name: Setup Database
     needs: [prepare]
-    if: ${{ needs.prepare.outputs.run-e2e == 'true' && needs.prepare.outputs.has-files-requiring-all-checks == 'true' }}
     uses: ./.github/workflows/setup-db.yml
     with:
       DB_CACHE_HIT: ${{ needs.prepare.outputs.db-cache-hit }}
@@ -362,105 +349,90 @@ jobs:
   build-api-v1:
     name: Production builds
     needs: [prepare, setup-db]
-    if: ${{ needs.prepare.outputs.run-e2e == 'true' && needs.prepare.outputs.has-files-requiring-all-checks == 'true' }}
     uses: ./.github/workflows/api-v1-production-build.yml
     secrets: inherit
 
   build-api-v2:
     name: Production builds
     needs: [prepare]
-    if: ${{ needs.prepare.outputs.run-e2e == 'true' && needs.prepare.outputs.has-files-requiring-all-checks == 'true' }}
     uses: ./.github/workflows/api-v2-production-build.yml
     secrets: inherit
 
   build-atoms:
     name: Production builds
     needs: [prepare]
-    if: ${{ needs.prepare.outputs.run-e2e == 'true' && needs.prepare.outputs.has-files-requiring-all-checks == 'true' }}
     uses: ./.github/workflows/atoms-production-build.yml
     secrets: inherit
 
   build-docs:
     name: Production builds
     needs: [prepare]
-    if: ${{ needs.prepare.outputs.run-e2e == 'true' && needs.prepare.outputs.has-files-requiring-all-checks == 'true' }}
     uses: ./.github/workflows/docs-build.yml
     secrets: inherit
 
   build-companion:
     name: Companion builds
     needs: [prepare]
-    if: needs.prepare.outputs.has-companion == 'true'
     uses: ./.github/workflows/companion-build.yml
     secrets: inherit
 
   typecheck-companion:
     name: Type Checks
     needs: [prepare]
-    if: needs.prepare.outputs.has-companion == 'true'
     uses: ./.github/workflows/companion-typecheck.yml
     secrets: inherit
 
   lint-companion:
     name: Linters
     needs: [prepare]
-    if: needs.prepare.outputs.has-companion == 'true'
     uses: ./.github/workflows/companion-lint.yml
     secrets: inherit
 
   build:
     name: Production builds
     needs: [prepare]
-    if: ${{ needs.prepare.outputs.run-e2e == 'true' && needs.prepare.outputs.has-files-requiring-all-checks == 'true' }}
     uses: ./.github/workflows/production-build-without-database.yml
     secrets: inherit
 
   integration-test:
     name: Tests
     needs: [prepare, build, setup-db]
-    if: ${{ needs.prepare.outputs.run-e2e == 'true' && needs.prepare.outputs.has-files-requiring-all-checks == 'true' }}
     uses: ./.github/workflows/integration-tests.yml
     secrets: inherit
 
   e2e:
     name: Tests
     needs: [prepare, build, setup-db]
-    if: ${{ needs.prepare.outputs.run-e2e == 'true' && needs.prepare.outputs.has-files-requiring-all-checks == 'true' }}
     uses: ./.github/workflows/e2e.yml
     secrets: inherit
 
   check-api-v2-breaking-changes:
     name: Check API v2 breaking changes
     needs: [prepare]
-    if: ${{ needs.prepare.outputs.run-e2e == 'true' && needs.prepare.outputs.has-api-v2-changes == 'true' }}
     uses: ./.github/workflows/check-api-v2-breaking-changes.yml
     secrets: inherit
 
   e2e-api-v2:
     name: Tests
     needs: [prepare, setup-db]
-    if: ${{ needs.prepare.outputs.run-e2e == 'true' && needs.prepare.outputs.has-files-requiring-all-checks == 'true' }}
     uses: ./.github/workflows/e2e-api-v2.yml
     secrets: inherit
 
   e2e-app-store:
     name: Tests
     needs: [prepare, build, setup-db]
-    if: ${{ needs.prepare.outputs.run-e2e == 'true' && needs.prepare.outputs.has-files-requiring-all-checks == 'true' }}
     uses: ./.github/workflows/e2e-app-store.yml
     secrets: inherit
 
   e2e-embed:
     name: Tests
     needs: [prepare, build, setup-db]
-    if: ${{ needs.prepare.outputs.run-e2e == 'true' && needs.prepare.outputs.has-files-requiring-all-checks == 'true' }}
     uses: ./.github/workflows/e2e-embed.yml
     secrets: inherit
 
   e2e-embed-react:
     name: Tests
     needs: [prepare, build, setup-db]
-    if: ${{ needs.prepare.outputs.run-e2e == 'true' && needs.prepare.outputs.has-files-requiring-all-checks == 'true' }}
     uses: ./.github/workflows/e2e-embed-react.yml
     secrets: inherit
 
@@ -552,3 +524,4 @@ jobs:
             needs.prepare.outputs.has-agents-changes == 'true' &&
             needs.validate-agents-format.result != 'success'
           )
+

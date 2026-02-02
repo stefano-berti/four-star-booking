@@ -2,8 +2,7 @@
 name: Build
 
 on:
-  workflow_call:
-
+  workflow_dispatch:
 jobs:
   build:
     name: Build Docs
@@ -36,3 +35,4 @@ jobs:
           sleep 5 # Let it run for 5 seconds
           kill $!
         shell: bash
+

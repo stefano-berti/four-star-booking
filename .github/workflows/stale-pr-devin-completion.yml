@@ -1,15 +1,7 @@
 name: Stale Community PR Devin Completion
 
 on:
-  pull_request_target:
-    types: [labeled]
   workflow_dispatch:
-    inputs:
-      pr_number:
-        description: 'PR number to complete'
-        required: true
-        type: string
-
 permissions:
   contents: read
   pull-requests: write
@@ -289,3 +281,4 @@ jobs:
               issue_number: parseInt(prNumber),
               body: message
             });
+
