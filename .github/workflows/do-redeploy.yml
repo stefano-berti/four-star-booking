@@ -7,18 +7,12 @@ jobs:
   redeploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Install doctl (pin version)
+      - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DO_API_TOKEN }}
-          version: "1.146.0"
 
-      - name: Debug doctl
+      - name: Redeploy (force rebuild)
         run: |
-          which doctl
           doctl version
-          doctl apps create-deployment --help | sed -n '1,120p'
-
-      - name: Trigger App Platform deployment
-        run: |
-          doctl apps create-deployment "${{ secrets.DO_APP_ID }}" --update-sources --wait
+          doctl apps create-deployment "${{ secrets.DO_APP_ID }}" --force-rebuild --wait
