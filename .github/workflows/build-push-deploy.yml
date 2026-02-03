@@ -2,7 +2,7 @@ name: Build, push, then deploy to DO
 
 on:
   schedule:
-    - cron: "0 3 * * *" # daily 03:00 UTC
+    - cron: "0 5 * * *" # daily 05:00 UTC
   workflow_dispatch:
 
 jobs:
