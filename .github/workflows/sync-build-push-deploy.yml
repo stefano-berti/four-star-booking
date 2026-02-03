@@ -117,14 +117,16 @@ jobs:
         run: |
           doctl apps create-deployment "${{ secrets.DO_APP_ID }}" --force-rebuild --wait
 
-      - name: ClickUp notify on failure (deploy)
+      - name: ClickUp notify on failure (sync_rebase)
         if: ${{ failure() && vars.ENABLE_CLICKUP == 'true' }}
         env:
           CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
           CLICKUP_LIST_ID: ${{ secrets.CLICKUP_LIST_ID }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          CLICKUP_ASSIGNEE_ID: "68662414"
         run: |
           curl -sS -X POST "https://api.clickup.com/api/v2/list/${CLICKUP_LIST_ID}/task" \
             -H "Authorization: ${CLICKUP_TOKEN}" \
             -H "Content-Type: application/json" \
-            -d "{\"name\":\"CI failed in deploy: four-star-booking\",\"description\":\"Run: ${RUN_URL}\",\"priority\":2}" || true
+            -d "{\"name\":\"CI failed in sync_rebase: four-star-booking\",\"description\":\"Run: ${RUN_URL}\",\"priority\":2,\"assignees\":[${CLICKUP_ASSIGNEE_ID}]}" || true
+
