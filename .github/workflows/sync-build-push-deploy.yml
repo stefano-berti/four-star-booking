@@ -110,11 +110,12 @@ jobs:
             });
 
       # OPTIONAL: Create a ClickUp task (requires secrets CLICKUP_TOKEN and CLICKUP_LIST_ID)
-      - name: Create ClickUp task on failure (optional)
-        if: ${{ secrets.CLICKUP_TOKEN != '' && secrets.CLICKUP_LIST_ID != '' }}
-        run: |
-          RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          curl -sS -X POST "https://api.clickup.com/api/v2/list/${{ secrets.CLICKUP_LIST_ID }}/task" \
-            -H "Authorization: ${{ secrets.CLICKUP_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d "{\"name\":\"CI failed: four-star-booking\",\"description\":\"Run: ${RUN_URL}\",\"priority\":2}"
+      - name: Create ClickUp task on failure
+  if: ${{ failure() && vars.ENABLE_CLICKUP == 'true' }}
+  run: |
+    RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+    curl -sS -X POST "https://api.clickup.com/api/v2/list/${{ secrets.CLICKUP_LIST_ID }}/task" \
+      -H "Authorization: ${{ secrets.CLICKUP_TOKEN }}" \
+      -H "Content-Type: application/json" \
+      -d "{\"name\":\"CI failed: four-star-booking\",\"description\":\"Run: ${RUN_URL}\",\"priority\":2}"
+
