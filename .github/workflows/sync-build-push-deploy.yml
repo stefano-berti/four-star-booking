@@ -88,50 +88,50 @@ jobs:
         run: |
           doctl apps create-deployment "${{ secrets.DO_APP_ID }}" --force-rebuild --wait
 
-  notify_on_failure:
-  name: Notify on failure
-  needs: [sync_rebase, build_push, deploy]
-  runs-on: ubuntu-latest
-  permissions:
-    issues: write
-  if: >
-    ${{
-      always() &&
-      (needs.sync_rebase.result == 'failure' ||
-        needs.build_push.result == 'failure' ||
-        needs.deploy.result == 'failure')
-    }}
-  steps:
-    - name: Create GitHub issue
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
-          const title = `🚨 CI failed: sync/build/deploy (${new Date().toISOString()})`;
-          const body =
-            `A scheduled run failed.\n\n` +
-            `Run: ${runUrl}\n\n` +
-            `Job results:\n` +
-            `- sync_rebase: ${{ needs.sync_rebase.result }}\n` +
-            `- build_push: ${{ needs.build_push.result }}\n` +
-            `- deploy: ${{ needs.deploy.result }}\n`;
-          await github.rest.issues.create({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            title,
-            body
-          });
+    notify_on_failure:
+    name: Notify on failure
+    needs: [sync_rebase, build_push, deploy]
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    if: >
+      ${{
+        always() &&
+        (needs.sync_rebase.result == 'failure' ||
+          needs.build_push.result == 'failure' ||
+          needs.deploy.result == 'failure')
+      }}
+    steps:
+      - name: Create GitHub issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+            const title = `🚨 CI failed: sync/build/deploy (${new Date().toISOString()})`;
+            const body =
+              `A scheduled run failed.\n\n` +
+              `Run: ${runUrl}\n\n` +
+              `Job results:\n` +
+              `- sync_rebase: ${{ needs.sync_rebase.result }}\n` +
+              `- build_push: ${{ needs.build_push.result }}\n` +
+              `- deploy: ${{ needs.deploy.result }}\n`;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body
+            });
 
-    - name: Create ClickUp task
-      if: ${{ vars.ENABLE_CLICKUP == 'true' }}
-      env:
-        CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
-        CLICKUP_LIST_ID: ${{ secrets.CLICKUP_LIST_ID }}
-        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-      run: |
-        curl -sS -X POST "https://api.clickup.com/api/v2/list/${CLICKUP_LIST_ID}/task" \
-          -H "Authorization: ${CLICKUP_TOKEN}" \
-          -H "Content-Type: application/json" \
-          -d "{\"name\":\"CI failed: four-star-booking\",\"description\":\"Run: ${RUN_URL}\",\"priority\":2}"
+      - name: Create ClickUp task
+        if: ${{ vars.ENABLE_CLICKUP == 'true' }}
+        env:
+          CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
+          CLICKUP_LIST_ID: ${{ secrets.CLICKUP_LIST_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          curl -sS -X POST "https://api.clickup.com/api/v2/list/${CLICKUP_LIST_ID}/task" \
+            -H "Authorization: ${CLICKUP_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "{\"name\":\"CI failed: four-star-booking\",\"description\":\"Run: ${RUN_URL}\",\"priority\":2}"
 
 
