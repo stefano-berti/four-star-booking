@@ -92,19 +92,13 @@ jobs:
         run: |
           doctl apps create-deployment "${{ secrets.DO_APP_ID }}" --force-rebuild --wait
 
-  notify_on_failure:
+      notify_on_failure:
     name: Notify on failure
     needs: [sync_rebase, build_push, deploy]
     runs-on: ubuntu-latest
     permissions:
       issues: write
-    if: >
-      ${{
-        always() &&
-        (needs.sync_rebase.result == 'failure' ||
-         needs.build_push.result == 'failure' ||
-         needs.deploy.result == 'failure')
-      }}
+    if: ${{ always() && (needs.sync_rebase.result == 'failure' || needs.build_push.result == 'failure' || needs.deploy.result == 'failure') }}
     steps:
       - name: Create GitHub issue
         uses: actions/github-script@v7
@@ -113,7 +107,6 @@ jobs:
             const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
             const title = `🚨 CI failed: sync/build/deploy (${new Date().toISOString()})`;
             const body =
-              `A scheduled run failed.\n\n` +
               `Run: ${runUrl}\n\n` +
               `Job results:\n` +
               `- sync_rebase: ${{ needs.sync_rebase.result }}\n` +
@@ -132,8 +125,21 @@ jobs:
           CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
           CLICKUP_LIST_ID: ${{ secrets.CLICKUP_LIST_ID }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SYNC_RESULT: ${{ needs.sync_rebase.result }}
+          BUILD_RESULT: ${{ needs.build_push.result }}
+          DEPLOY_RESULT: ${{ needs.deploy.result }}
         run: |
+          set -e
+          DESC="Run: ${RUN_URL}\n\nResults:\n- sync_rebase: ${SYNC_RESULT}\n- build_push: ${BUILD_RESULT}\n- deploy: ${DEPLOY_RESULT}"
+          # Escape newlines for JSON
+          DESC_JSON=$(python - << 'PY'
+import json, os
+print(json.dumps(os.environ["DESC"]))
+PY
+)
           curl -sS -X POST "https://api.clickup.com/api/v2/list/${CLICKUP_LIST_ID}/task" \
             -H "Authorization: ${CLICKUP_TOKEN}" \
             -H "Content-Type: application/json" \
-            -d "{\"name\":\"CI failed: four-star-booking\",\"description\":\"Run: ${RUN_URL}\",\"priority\":2}"
+            -d "{\"name\":\"CI failed: four-star-booking\",\"description\":${DESC_JSON},\"priority\":2}"
+
+
