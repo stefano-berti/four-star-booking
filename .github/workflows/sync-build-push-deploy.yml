@@ -65,18 +65,31 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
+
           payload=$(jq -n \
-            --arg name "CI failed in sync_rebase: four-star-booking" \
+            --arg name "🚨 CI failed in sync_rebase: four-star-booking" \
             --arg desc "Run: ${RUN_URL}" \
             --argjson prio 2 \
             --argjson assignee 68662414 \
-            '{name:$name, description:$desc, priority:$prio, assignees:[$assignee]}')
-          echo "Payload: $payload"
+            '{ 
+              name: $name,
+              description: $desc,
+              priority: $prio,
+              assignees: [$assignee],
+              notify_all: true
+            }')
+
+          echo "ClickUp payload:"
+          echo "$payload"
+
           resp=$(curl -sS -X POST "https://api.clickup.com/api/v2/list/${CLICKUP_LIST_ID}/task" \
             -H "Authorization: ${CLICKUP_TOKEN}" \
             -H "Content-Type: application/json" \
-            -d "$payload" || true)
-          echo "ClickUp response: $resp"
+            -d "$payload")
+
+          echo "ClickUp response:"
+          echo "$resp"
+
 
 
   build_push:
@@ -129,18 +142,30 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
+
           payload=$(jq -n \
-            --arg name "CI failed in sync_rebase: four-star-booking" \
+            --arg name "🚨 CI failed in sync_rebase: four-star-booking" \
             --arg desc "Run: ${RUN_URL}" \
             --argjson prio 2 \
             --argjson assignee 68662414 \
-            '{name:$name, description:$desc, priority:$prio, assignees:[$assignee]}')
-          echo "Payload: $payload"
+            '{ 
+              name: $name,
+              description: $desc,
+              priority: $prio,
+              assignees: [$assignee],
+              notify_all: true
+            }')
+
+          echo "ClickUp payload:"
+          echo "$payload"
+
           resp=$(curl -sS -X POST "https://api.clickup.com/api/v2/list/${CLICKUP_LIST_ID}/task" \
             -H "Authorization: ${CLICKUP_TOKEN}" \
             -H "Content-Type: application/json" \
-            -d "$payload" || true)
-          echo "ClickUp response: $resp"
+            -d "$payload")
+
+          echo "ClickUp response:"
+          echo "$resp"
 
 
   deploy:
@@ -164,16 +189,28 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
+
           payload=$(jq -n \
-            --arg name "CI failed in sync_rebase: four-star-booking" \
+            --arg name "🚨 CI failed in sync_rebase: four-star-booking" \
             --arg desc "Run: ${RUN_URL}" \
             --argjson prio 2 \
             --argjson assignee 68662414 \
-            '{name:$name, description:$desc, priority:$prio, assignees:[$assignee]}')
-          echo "Payload: $payload"
+            '{ 
+              name: $name,
+              description: $desc,
+              priority: $prio,
+              assignees: [$assignee],
+              notify_all: true
+            }')
+
+          echo "ClickUp payload:"
+          echo "$payload"
+
           resp=$(curl -sS -X POST "https://api.clickup.com/api/v2/list/${CLICKUP_LIST_ID}/task" \
             -H "Authorization: ${CLICKUP_TOKEN}" \
             -H "Content-Type: application/json" \
-            -d "$payload" || true)
-          echo "ClickUp response: $resp"
+            -d "$payload")
+
+          echo "ClickUp response:"
+          echo "$resp"
 
