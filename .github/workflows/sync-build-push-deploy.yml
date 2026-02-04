@@ -5,11 +5,12 @@ on:
     - cron: "0 5 * * 1" # weekly 05:00 UTC
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   sync_rebase:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Checkout custom branch (full history)
         uses: actions/checkout@v4
@@ -29,21 +30,28 @@ jobs:
           git fetch upstream --tags
           git fetch origin --tags
 
-      - name: Snapshot our workflows (before rebase)
+      # Snapshot our workflow files so we never push upstream workflow changes
+      # (GitHub blocks GITHUB_TOKEN from updating .github/workflows/* unless workflow permission is granted)
+      - name: Snapshot our workflows
         run: |
           mkdir -p /tmp/ours_workflows
-          rsync -a .github/workflows/ /tmp/ours_workflows/ || true
+          if [ -d ".github/workflows" ]; then
+            rsync -a .github/workflows/ /tmp/ours_workflows/
+          fi
 
       - name: Rebase custom-patches onto upstream/main (prefer ours)
         run: |
           git checkout custom-patches
           git rebase -X ours upstream/main
 
-      - name: Restore our workflows (so they never change)
+      # Restore our workflows so the rebase can't change them (avoids push rejection)
+      - name: Restore our workflows (keep local)
         run: |
           rm -rf .github/workflows
           mkdir -p .github/workflows
-          rsync -a /tmp/ours_workflows/ .github/workflows/ || true
+          if [ -d "/tmp/ours_workflows" ]; then
+            rsync -a /tmp/ours_workflows/ .github/workflows/
+          fi
           git add .github/workflows
           git commit -m "Keep local workflows" || true
 
@@ -57,14 +65,13 @@ jobs:
           CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
           CLICKUP_LIST_ID: ${{ secrets.CLICKUP_LIST_ID }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          CLICKUP_ASSIGNEE_ID: "68662414"
         run: |
           payload=$(jq -n \
             --arg name "CI failed in sync_rebase: four-star-booking" \
             --arg desc "Run: ${RUN_URL}" \
             --argjson prio 2 \
             --argjson assignee 68662414 \
-            '{name:$name, description:$desc, priority:$prio, assignees:[$assignee]}')
+            '{name:$name, description:$desc, priority:$prio, assignees:[$assignee] }')
           echo "$payload"
           curl -sS -X POST "https://api.clickup.com/api/v2/list/${CLICKUP_LIST_ID}/task" \
             -H "Authorization: ${CLICKUP_TOKEN}" \
@@ -125,7 +132,7 @@ jobs:
             --arg desc "Run: ${RUN_URL}" \
             --argjson prio 2 \
             --argjson assignee 68662414 \
-            '{name:$name, description:$desc, priority:$prio, assignees:[$assignee]}')
+            '{name:$name, description:$desc, priority:$prio, assignees:[$assignee] }')
           echo "$payload"
           curl -sS -X POST "https://api.clickup.com/api/v2/list/${CLICKUP_LIST_ID}/task" \
             -H "Authorization: ${CLICKUP_TOKEN}" \
@@ -157,7 +164,7 @@ jobs:
             --arg desc "Run: ${RUN_URL}" \
             --argjson prio 2 \
             --argjson assignee 68662414 \
-            '{name:$name, description:$desc, priority:$prio, assignees:[$assignee]}')
+            '{name:$name, description:$desc, priority:$prio, assignees:[$assignee] }')
           echo "$payload"
           curl -sS -X POST "https://api.clickup.com/api/v2/list/${CLICKUP_LIST_ID}/task" \
             -H "Authorization: ${CLICKUP_TOKEN}" \
