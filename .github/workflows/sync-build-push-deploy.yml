@@ -23,35 +23,53 @@ jobs:
           git config user.email "github-actions@users.noreply.github.com"
           git config --global merge.ours.driver true
 
-
       - name: Add upstream + fetch
         run: |
           git remote add upstream https://github.com/calcom/cal.com.git || true
           git fetch upstream --tags
           git fetch origin --tags
 
-      - name: Rebase custom-patches onto upstream/main
+      - name: Snapshot our workflows (before rebase)
+        run: |
+          mkdir -p /tmp/ours_workflows
+          rsync -a .github/workflows/ /tmp/ours_workflows/ || true
+
+      - name: Rebase custom-patches onto upstream/main (prefer ours)
         run: |
           git checkout custom-patches
           git rebase -X ours upstream/main
 
+      - name: Restore our workflows (so they never change)
+        run: |
+          rm -rf .github/workflows
+          mkdir -p .github/workflows
+          rsync -a /tmp/ours_workflows/ .github/workflows/ || true
+          git add .github/workflows
+          git commit -m "Keep local workflows" || true
 
       - name: Push rebased custom-patches
         run: |
           git push --force-with-lease origin custom-patches
 
-      # GUARANTEED ClickUp notification if THIS job fails (rebase conflicts)
       - name: ClickUp notify on failure (sync_rebase)
         if: ${{ failure() && vars.ENABLE_CLICKUP == 'true' }}
         env:
           CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
           CLICKUP_LIST_ID: ${{ secrets.CLICKUP_LIST_ID }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          CLICKUP_ASSIGNEE_ID: "68662414"
         run: |
+          payload=$(jq -n \
+            --arg name "CI failed in sync_rebase: four-star-booking" \
+            --arg desc "Run: ${RUN_URL}" \
+            --argjson prio 2 \
+            --argjson assignee 68662414 \
+            '{name:$name, description:$desc, priority:$prio, assignees:[$assignee]}')
+          echo "$payload"
           curl -sS -X POST "https://api.clickup.com/api/v2/list/${CLICKUP_LIST_ID}/task" \
             -H "Authorization: ${CLICKUP_TOKEN}" \
             -H "Content-Type: application/json" \
-            -d "{\"name\":\"CI failed in sync_rebase: four-star-booking\",\"description\":\"Run: ${RUN_URL}\",\"priority\":2}" || true
+            -d "$payload" || true
 
   build_push:
     needs: sync_rebase
@@ -102,10 +120,17 @@ jobs:
           CLICKUP_LIST_ID: ${{ secrets.CLICKUP_LIST_ID }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
+          payload=$(jq -n \
+            --arg name "CI failed in build_push: four-star-booking" \
+            --arg desc "Run: ${RUN_URL}" \
+            --argjson prio 2 \
+            --argjson assignee 68662414 \
+            '{name:$name, description:$desc, priority:$prio, assignees:[$assignee]}')
+          echo "$payload"
           curl -sS -X POST "https://api.clickup.com/api/v2/list/${CLICKUP_LIST_ID}/task" \
             -H "Authorization: ${CLICKUP_TOKEN}" \
             -H "Content-Type: application/json" \
-            -d "{\"name\":\"CI failed in build_push: four-star-booking\",\"description\":\"Run: ${RUN_URL}\",\"priority\":2}" || true
+            -d "$payload" || true
 
   deploy:
     needs: build_push
@@ -120,24 +145,21 @@ jobs:
         run: |
           doctl apps create-deployment "${{ secrets.DO_APP_ID }}" --force-rebuild --wait
 
-      - name: ClickUp notify on failure (sync_rebase)
+      - name: ClickUp notify on failure (deploy)
         if: ${{ failure() && vars.ENABLE_CLICKUP == 'true' }}
         env:
           CLICKUP_TOKEN: ${{ secrets.CLICKUP_TOKEN }}
           CLICKUP_LIST_ID: ${{ secrets.CLICKUP_LIST_ID }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          CLICKUP_ASSIGNEE_ID: 68662414
         run: |
           payload=$(jq -n \
-            --arg name "CI failed in sync_rebase: four-star-booking" \
+            --arg name "CI failed in deploy: four-star-booking" \
             --arg desc "Run: ${RUN_URL}" \
             --argjson prio 2 \
-            --argjson assignee "${CLICKUP_ASSIGNEE_ID}" \
-            '{name:$name, description:$desc, priority:$prio, assignees:[$assignee] }')
+            --argjson assignee 68662414 \
+            '{name:$name, description:$desc, priority:$prio, assignees:[$assignee]}')
           echo "$payload"
           curl -sS -X POST "https://api.clickup.com/api/v2/list/${CLICKUP_LIST_ID}/task" \
             -H "Authorization: ${CLICKUP_TOKEN}" \
             -H "Content-Type: application/json" \
             -d "$payload" || true
-
-
