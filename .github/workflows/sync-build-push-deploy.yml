@@ -29,12 +29,6 @@ jobs:
           git fetch upstream --tags
           git fetch origin --tags
 
-      - name: FAILURE TEST (remove after)
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        run: |
-          echo "Intentional failure to test ClickUp notification"
-          exit 1
-
       - name: Snapshot our workflows (before rebase)
         run: |
           mkdir -p /tmp/ours_workflows
