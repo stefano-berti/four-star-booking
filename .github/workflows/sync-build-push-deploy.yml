@@ -41,37 +41,47 @@ jobs:
           git rebase --empty=drop -X ours upstream/main
           set -e
           # Auto-resolve any conflict that lies entirely inside .github/workflows/.
-          # Rationale: our custom workflows are fully reapplied from the pre-rebase
-          # snapshot in the next step, so the only thing that matters here is
-          # honouring upstream deletions (e.g. workflows we had disabled and that
-          # upstream then removed) so the rebase can progress.
+          # Our workflows are fully reapplied from the pre-rebase snapshot in the
+          # next step, so what matters here is honouring either side's deletion
+          # so the rebase can progress. A modify/delete from upstream means a
+          # workflow we had disabled was later removed upstream; a modify/delete
+          # from our snapshot side means upstream added a workflow we don't want
+          # (snapshot taken before they added it). Both → accept the delete.
+          max_iters=100
+          iter=0
           while [ -d .git/rebase-merge ] || [ -d .git/rebase-apply ]; do
-            unmerged=$(git diff --name-only --diff-filter=U)
-            outside=$(echo "$unmerged" | grep -v '^\.github/workflows/' || true)
-            if [ -n "$outside" ]; then
-              echo "Unresolvable conflicts outside .github/workflows/:"
-              echo "$outside"
+            iter=$((iter+1))
+            if [ "$iter" -gt "$max_iters" ]; then
+              echo "Exceeded max rebase iterations ($max_iters)"
+              git status
               exit 1
             fi
-            for f in $unmerged; do
-              # Stage 2 = "ours" (HEAD = upstream during rebase). If missing,
-              # upstream deleted the file — accept the deletion.
-              if git ls-files -u -- "$f" | awk '{print $3}' | grep -q '^2$'; then
-                git checkout --ours -- "$f"
-                git add -- "$f"
-              else
-                git rm -f "$f"
-                rm -f "/tmp/ours_workflows/${f#.github/workflows/}"
-              fi
-            done
-            # Continue; if the commit ends up empty (all its changes were on
-            # files upstream removed) git will drop it because of --empty=drop.
-            if ! GIT_EDITOR=true git -c core.editor=true rebase --continue; then
-              if git diff --cached --quiet && git diff --quiet; then
-                git rebase --skip
-              else
+            unmerged=$(git diff --name-only --diff-filter=U)
+            if [ -n "$unmerged" ]; then
+              outside=$(echo "$unmerged" | grep -v '^\.github/workflows/' || true)
+              if [ -n "$outside" ]; then
+                echo "Unresolvable conflicts outside .github/workflows/:"
+                echo "$outside"
                 exit 1
               fi
+              for f in $unmerged; do
+                stages=$(git ls-files -u -- "$f" | awk '{print $3}' | sort -u)
+                if echo "$stages" | grep -qx '2' && echo "$stages" | grep -qx '3'; then
+                  # both sides modified; keep ours, Restore step overwrites anyway
+                  git checkout --ours -- "$f"
+                  git add -- "$f"
+                else
+                  # modify/delete in either direction — accept the deletion
+                  git rm -f "$f"
+                  rm -f "/tmp/ours_workflows/${f#.github/workflows/}"
+                fi
+              done
+              GIT_EDITOR=true git -c core.editor=true rebase --continue || true
+            else
+              # no unmerged files but still mid-rebase: likely an empty commit
+              GIT_EDITOR=true git -c core.editor=true rebase --skip \
+                || GIT_EDITOR=true git -c core.editor=true rebase --continue \
+                || exit 1
             fi
           done
 
